@@ -1,4 +1,4 @@
-const {getAllLaunches,addNewLaunch, existsLaunchWithId, abortLaunchById} = require ('../../models/launches.model');
+const {getAllLaunches, existsLaunchWithId, abortLaunchById, scheduleNewLaunch} = require ('../../models/launches.model');
 
 // GET
 async function httpGetAllLaunches(req, res) {
@@ -6,7 +6,7 @@ async function httpGetAllLaunches(req, res) {
 }
 
 // POST
-function httpAddNewLaunch (req, res) {
+async function httpAddNewLaunch (req, res) {
     const launch = req.body;
 
     if(!launch.mission || !launch.rocket || !launch.target 
@@ -21,13 +21,13 @@ function httpAddNewLaunch (req, res) {
             error: 'Invalid launch date',
         })
     }
-    addNewLaunch(launch);
+    await scheduleNewLaunch(launch);
     return res.status(201).json(launch)
 }
 
 function httpAbortLaunch(req, res) {
     const launchId = Number(req.params.id);
-     
+    
     if(!existsLaunchWithId(launchId)){
         return res.status(404).json({
             error: 'Launch not found'
