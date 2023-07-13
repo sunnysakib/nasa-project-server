@@ -10,7 +10,7 @@ const launch = {
   mission: "Kepler Exploration X",
   rocket: "Explorer IS1",
   launchDate: new Date("December 27, 2030"),
-  target: "Kepler-442 b",
+  target: "Kepler-62 f",
   customers: ["ZTM", "nasa"],
   upcoming: true,
   success: true,
@@ -19,8 +19,10 @@ const launch = {
 
 saveLaunch(launch);
 
-function existsLaunchWithId(launchId){
-   return launches.has(launchId);
+async function existsLaunchWithId(launchId){
+   return await launchesDatabase.findOne({
+    flightNumber: launchId
+   });
 }
 
 async function getLatestFlightNumber() {
@@ -63,11 +65,15 @@ async function scheduleNewLaunch(launch){
   await saveLaunch(newLaunch);
 }
 
-function abortLaunchById(launchId) {
-    const aborted = launches.get(launchId);
-    aborted.upcoming = false;
-    aborted.success = false;
-    return aborted;
+async function abortLaunchById(launchId) {
+    const aborted = await launchesDatabase.updateOne({
+      flightNumber: launchId
+    },{
+      upcoming: false,
+      success: false
+    })
+
+    return aborted.acknowledged === true && aborted.modifiedCount === 1;
 }
 
 module.exports = { getAllLaunches, scheduleNewLaunch, existsLaunchWithId, abortLaunchById };
